@@ -1574,6 +1574,8 @@ const BRAND = {
   terms: {
     licDesk:'Licensing', licDeskZh:'牌照組',          // back-office licensing & registration desk
     eRecruit:'e-Recruitment', eRecruitZh:'電子招募',   // online onboarding / e-recruitment system
+    proposal:'e-Proposal',                            // proposal/SIP tool (was a carrier system name)
+    nbPortal:'the new-business portal',               // NB submission portal (was a carrier system name)
   },
 };
 class Component extends DCLogic {
@@ -1857,7 +1859,7 @@ class Component extends DCLogic {
   setIIQE(v)   { this.setState({ aIIQE:v }); }
   toggleDeclared(){ this.setState({ declared:!this.state.declared }); }
   openFile(){ try{ window.open('agent/recruitment-file.html','_blank'); }catch(e){} }
-  reset()      { this.clearTimers(); this.setState({ screen:'home', journey:null, revealed:0, timer:0, loadingDone:false, loadPct:0, litStage:0, tooltip:null, aCommit:'ft', aIIQE:'passed', declared:false, income:'', payout:'' }); }
+  reset()      { this.clearTimers(); this.setState({ screen:'home', journey:null, revealed:0, timer:0, loadingDone:false, loadPct:0, litStage:0, tooltip:null, lang:'en', aCommit:'ft', aIIQE:'passed', declared:false, income:'', payout:'' }); }
 
   totalFields() { const j = this.jrn(); if (!j) return 0; const jn=this.state.journey; const forms = (jn==='client') ? this.clientForms(this.clientProfile()) : (jn==='claims' ? this.claimForms() : j.forms); let n=0; forms.forEach(f=>f.sections.forEach(s=>{ n+=s.fields.length; })); return n; }
 
@@ -2183,6 +2185,7 @@ class Component extends DCLogic {
   CLIENT_PROFILES(){
     return [
       { key:'straight', label:'Straight-through — approved', note:'Healthy · high income · issues this session', status:'approved',
+        product:'Whole Life · participating', sumText:'HKD 16,000,000 (≈USD 2.05M)', ci:false, laq:true, sow:false, replacement:false,
         sal:'Mr.', first:'志遠 · Zhiyuan', surname:'陳 · Chen', dob:'14 / 03 / 1978', gender:'Male', occupation:'Company director', email:'chen****@qq.com', addrFull:'Futian District, Shenzhen', phone:'+86 138 ****8866',
         inforce:'2 policies · ~CNY 38k premium', inforceNotes:['2 life-insurance merchants in last 12 months','No failed insurance payments'], declined:'No — none on file',
         dispBand:'Over HK$100,000 (band)', dispBandNotes:['Self-declared band corroborated at source','Disposable-income score 82 / 100'], dispPct:'21% – 30%', sourceFunds:'Business income · property · investments', income:'~CNY 1.18M', incomeNote:'Affordability band: high', assets:'84 / 100', assetsNotes:['Property Grade A · vehicle Grade A · wealth tier 2/10'],
@@ -2201,6 +2204,7 @@ class Component extends DCLogic {
         decCaption:'The agent typed only a handful of fields. The personal application, the GL30 needs analysis, the health declaration and the underwriting review filled themselves — verified at source.' },
 
       { key:'lowincome', label:'Low income — affordability', note:'Premium above the suitability ceiling', status:'review',
+        product:'Whole Life', sumText:'HKD 350,000 (≈USD 45k)', ci:false, laq:false, sow:false, replacement:false,
         sal:'Ms.', first:'家欣 · Ka Yan', surname:'吳 · Ng', dob:'02 / 09 / 1996', gender:'Female', occupation:'Retail supervisor', email:'ng****@qq.com', addrFull:'Longgang District, Shenzhen', phone:'+86 137 ****4012',
         inforce:'None on file', inforceNotes:['No in-force life policies found'], declined:'No — none on file',
         dispBand:'Under HK$8,000 (band)', dispBandNotes:['Self-declared band corroborated at source','Disposable-income score 31 / 100'], dispPct:'Over 40% (flagged)', sourceFunds:'Salary — single employer', income:'~HK$190,000', incomeNote:'Affordability band: modest', assets:'38 / 100', assetsNotes:['Limited property / wealth-management footprint','Wealth tier 7/10'],
@@ -2220,6 +2224,7 @@ class Component extends DCLogic {
         decCaption:'The application, the GL30 needs analysis and the underwriting review filled themselves — and the affordability gap surfaced before issue, not after.' },
 
       { key:'medical', label:'Medical issues — referred', note:'Disclosures trigger manual underwriting', status:'referred',
+        product:'Whole Life + Critical Illness rider', sumText:'HKD 1,500,000 (≈USD 192k)', ci:true, laq:false, sow:false, replacement:false,
         sal:'Mr.', first:'志強 · Chi Keung', surname:'劉 · Lau', dob:'27 / 11 / 1972', gender:'Male', occupation:'Logistics manager', email:'lau****@qq.com', addrFull:'Luohu District, Shenzhen', phone:'+86 139 ****7788',
         inforce:'1 policy · medical', inforceNotes:['1 in-force medical policy','No failed insurance payments'], declined:'No — none on file',
         dispBand:'HK$40,000 – HK$60,000 (band)', dispBandNotes:['Self-declared band corroborated at source','Disposable-income score 64 / 100'], dispPct:'11% – 20%', sourceFunds:'Employment income', income:'~HK$1.0M', incomeNote:'Affordability band: comfortable', assets:'66 / 100', assetsNotes:['Property and wealth-management on record','Wealth tier 4/10'],
@@ -2260,6 +2265,53 @@ class Component extends DCLogic {
     const medRows=[ mb(A('Risk class',p.riskClass), p.riskFlag), mb(V('Red-flag conditions',p.redFlags,'SZDE',p.redFlagsNotes||[]), p.redFlagFlag) ];
     if(p.indicative) medRows.push(flag(A('Indicative decision',p.indicative)));
     if(p.evidence) medRows.push(A('Evidence required',p.evidence));
+    // ---- MCV new-business (deck-mapped): document set, compliance/financial-UW gates, submission status ----
+    const basicDocs=[
+      V('Financial Needs Analysis (理財需要分析)','Prefilled','MOHRSS',['Auto-filled from verified income & profile']),
+      A('Proposal / SIP (建議書)',`Generated in ${BRAND.terms.proposal} · valid 1 month`),
+      V('Application form – traditional life (保險申請表)','Auto-filled','MPS',['Prefilled from eID']),
+      E('Advisor declaration (顧問聲明)','Manual upload · advisor-signed'),
+      E('IFS-MP — Mainland resident buying life in HK (重要資料聲明書)','Manual upload · signed & witnessed in HK'),
+      V('Entry / immigration proof (入境証明)','Verified','NIA',['Passport + HK entry stamp','Signing date must match the HK-entry date']),
+    ];
+    if(p.ci) basicDocs.push(E('CI plan supplement (危疾計劃投保申請補充書)','Manual upload · Critical-Illness rider'));
+    const condDocs=[];
+    if(p.laq) condDocs.push(flag(E('Large Amount Questionnaire — LAQ (大額問卷)','Manual upload · sum assured > USD 2M')));
+    if(p.sow) condDocs.push(flag(E('Source-of-funds / wealth proof (資金來源／財富來源)','Manual upload · premium ≥ USD 1M')));
+    if(p.replacement) condDocs.push(flag(E('Replacement statement — IFS-PR (轉保聲明)','Manual upload · replacing an in-force policy')));
+    const docSecs=[ { title:'Basic documents (必需文件)', fields: basicDocs } ];
+    if(condDocs.length) docSecs.push({ title:'Additional documents (額外文件 · by trigger)', fields: condDocs });
+    docSecs.push({ title:'Payment', fields:[
+      E('Payment method', p.laq?'Telegraphic transfer · HKD/USD':'Direct Debit Authorization (DDA / CDDA)'),
+      E('Currency','HKD / USD only (RMB subject to bank)'),
+    ]});
+    const gates=[
+      A('Insurable interest','Self — policy owner is the insured'),
+      V('Right to work / presence in HK','Verified','NIA',['港澳通行證 + HK entry record']),
+      E('Signed & witnessed in Hong Kong','Confirmed · entry proof on file'),
+      A('IFS-MP acknowledged','Mainland-resident disclosure signed in HK'),
+      (p.laq ? flag(A('Large Amount Questionnaire','Required (sum > USD 2M) — completed & cleared')) : A('Large Amount Questionnaire','Not required (below USD 1.5M)')),
+      (p.sow ? flag(A('Source of funds / wealth','Required (≥ USD 1M) — proof verified')) : A('Source of funds / wealth','Not required (below USD 1M)')),
+    ];
+    if(p.replacement) gates.push(flag(A('Replacement (轉保)','In-force policy replaced · IFS-PR signed')));
+    const mcvForms=[
+      { code:'FORM · DOC-5', title:'New-business submission file (中國內地居民)', status:'verified', sections: docSecs },
+      { code:'FORM · MCV-6', title:'MCV compliance & financial underwriting', status:(p.status==='approved'?'cleared':'review'), kind:'review', sections:[
+        { title:'Compliance & financial-UW checks', fields: gates },
+        { fields:[ DEC({ verdict:(p.status==='approved'?'Cleared':'Pending review'), verdictColor:(p.status==='approved'?'var(--good)':'var(--orange)'), sub:((p.laq||p.sow)?'Large-amount / source-of-wealth checks satisfied.':'Standard case — no large-amount checks triggered.'), stampText:(p.status==='approved'?'CLEARED':'REVIEW'), reviewer:'New business · L&H Operations', stp:'MCV · Agency' }) ]},
+      ]},
+      { code:'FORM · NB-7', title:'Submission & issuance', status:'verified', kind:'review', sections:[
+        { title:'Submission', grid:true, fields:[
+          E('Product', p.product||'Whole Life'), E('Sum assured', p.sumText||p.premiumText),
+          V('Submitted via',BRAND.terms.nbPortal,'MPS',['eID-prefilled e-submission · no drop-box, no NIGO']),
+          A('Underwriting SLA', (p.ci||p.status==='referred')?'Medical / HNW · T+2':'General · T+1'),
+        ]},
+        { title:'Status', fields:[
+          A('Status chain', 'Draft → Submitted → Pending UW → '+(p.status==='approved'?'Approved → Issued':(p.status==='referred'?'Manual UW (T+2)':'Suitability review'))),
+          A('Policy issuance', p.status==='approved'?`e-Policy via ${BRAND.insurer.name} app (or mailed to Mainland address)`:'Pending — issued after review'),
+        ]},
+      ]},
+    ];
     return [
       { code:'FORM · APP-1', title:'Personal application — applicant’s details', status:'auto-filled', sections:[
         { title:'1 · Applicant’s details (policyholder)', grid:true, fields:[
@@ -2318,6 +2370,7 @@ class Component extends DCLogic {
         { title:'Medical underwriting', fields: medRows },
         { fields:[ DEC({ verdict:p.verdict, verdictColor:p.verdictColor, sub:p.verdictSub, stampText:p.stamp, reviewer:p.reviewer, stp:p.stp }) ]},
       ]},
+      ...mcvForms,
     ];
   }
 
