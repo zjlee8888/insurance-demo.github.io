@@ -1079,6 +1079,29 @@
             </sc-if>
 
             <!-- ===== FILLED FORMS + RESULT ===== -->
+            <!-- ===== CLAIM-PICK · select invoices to claim, before the claim form ===== -->
+            <sc-if value="{{ isClaimPick }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:24px 20px 28px;">
+                <div style="font-family:var(--fm);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--blue);margin-bottom:12px;">Invoices retrieved</div>
+                <h2 style="font-family:var(--fd);font-weight:700;font-size:24px;line-height:1.1;letter-spacing:-.025em;color:var(--ink);margin:0 0 8px;">Select what to claim.</h2>
+                <p style="font-family:var(--fb);font-size:13.5px;color:var(--ink-2);line-height:1.5;margin:0 0 20px;">Your eID pulled these medical invoices from source. Tick the ones to include — the claim form fills itself for your selection.</p>
+                <sc-for list="{{ claimInvoices }}" as="inv" hint-placeholder-count="4">
+                  <button onclick="{{ inv.onToggle }}" style="{{ inv.style }}">
+                    <div style="{{ inv.boxStyle }}">{{ inv.check }}</div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-family:var(--fd);font-weight:700;font-size:14px;color:var(--ink);">{{ inv.line }}</div>
+                      <div style="font-family:var(--fb);font-size:12px;color:var(--ink-soft);margin-top:2px;">{{ inv.meta }}</div>
+                    </div>
+                    <div style="font-family:var(--fm);font-weight:600;font-size:13px;color:var(--ink);flex:none;">{{ inv.amount }}</div>
+                  </button>
+                </sc-for>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:14px;border:1px solid var(--ink);border-radius:12px;background:var(--paper-2);">
+                  <span style="font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);">Total to claim · {{ claimCount }} selected</span>
+                  <span style="font-family:var(--fd);font-weight:800;font-size:18px;color:var(--ink);">{{ claimTotal }}</span>
+                </div>
+              </div>
+            </sc-if>
+
             <sc-if value="{{ showFormsOrOnboard }}" hint-placeholder-val="{{ false }}">
               <div style="padding:20px 20px 32px;">
 
@@ -1820,11 +1843,12 @@ class Component extends DCLogic {
   clearTimers() { this._timers.forEach(t => clearTimeout(t)); this._timers = []; if (this._load) clearInterval(this._load); if (this._tick) clearInterval(this._tick); }
   later(fn, ms) { const t = setTimeout(fn, ms); this._timers.push(t); return t; }
 
-  pick(journey) { this.clearTimers(); const p0=this.AGENT_PROFILES()[0]; this.setState({ journey, screen:'setup', setupIdx:0, revealed:0, timer:0, loadingDone:false, loadPct:0, litStage:0, tooltip:null, income:(journey==='agent'?String(p0.incomeEst):''), aIIQE:(journey==='agent'?(p0.defaultIIQE||'passed'):'passed'), payout:'', declared:false }); }
+  pick(journey) { this.clearTimers(); const p0=this.AGENT_PROFILES()[0]; this.setState({ journey, screen:'setup', setupIdx:0, revealed:0, timer:0, loadingDone:false, loadPct:0, litStage:0, tooltip:null, income:(journey==='agent'?String(p0.incomeEst):''), aIIQE:(journey==='agent'?(p0.defaultIIQE||'passed'):'passed'), payout:'', declared:false, claimSel:(journey==='claims'?this.defaultClaimSel():null) }); }
   goTap()      { this.setState({ screen:'tap' }); }
   doTap()      { this.setState({ screen:'reading' }); this.later(() => this.setState({ screen:'consent' }), this.reduced ? 200 : 1500); }
   consentSign(){ const j=this.jrn(); this.setState({ screen:'pull', revealed:0, timer:0, loadingDone:false, loadPct:0, litStage:0, loadMsg: j?j.loaderMsgs[0]:'' }); this.startLoader(); }
-  goResult()   { this.setState({ screen:'result' }); }
+  goResult()   { this.setState({ screen:'result' }); const el=this.scrollRef.current; if(el) el.scrollTop=0; }
+  goClaimPick(){ this.setState({ screen:'claimpick' }); const el=this.scrollRef.current; if(el) el.scrollTop=0; }
   goAssess()   { this.setState({ screen:'assess' }); const el=this.scrollRef.current; if(el) el.scrollTop=0; }
   goOnboard()  { this.setState({ screen:'onboard' }); const el=this.scrollRef.current; if(el) el.scrollTop=0; }
   goDone()     { this.setState({ screen:'done' }); const el=this.scrollRef.current; if(el) el.scrollTop=0; }
@@ -1835,7 +1859,7 @@ class Component extends DCLogic {
   openFile(){ try{ window.open('agent/recruitment-file.html','_blank'); }catch(e){} }
   reset()      { this.clearTimers(); this.setState({ screen:'home', journey:null, revealed:0, timer:0, loadingDone:false, loadPct:0, litStage:0, tooltip:null, aCommit:'ft', aIIQE:'passed', declared:false, income:'', payout:'' }); }
 
-  totalFields() { const j = this.jrn(); if (!j) return 0; const forms = (this.state.journey==='client') ? this.clientForms(this.clientProfile()) : j.forms; let n=0; forms.forEach(f=>f.sections.forEach(s=>{ n+=s.fields.length; })); return n; }
+  totalFields() { const j = this.jrn(); if (!j) return 0; const jn=this.state.journey; const forms = (jn==='client') ? this.clientForms(this.clientProfile()) : (jn==='claims' ? this.claimForms() : j.forms); let n=0; forms.forEach(f=>f.sections.forEach(s=>{ n+=s.fields.length; })); return n; }
 
   startLoader() {
     const j = this.jrn(); const msgs = j.loaderMsgs; const n = msgs.length;
@@ -1853,7 +1877,7 @@ class Component extends DCLogic {
   finishLoader() {
     if (this._tick) clearInterval(this._tick);
     this.setState({ loadingDone:true, loadPct:100, revealed: this.totalFields() });
-    if (this.state.autoplay) this.later(() => this.goResult(), 1800);
+    if (this.state.autoplay) this.later(() => (this.state.journey==='claims'?this.goClaimPick():this.goResult()), 1800);
   }
 
   toggleAutoplay() { const on = !this.state.autoplay; this.setState({ autoplay:on }, ()=>{ if (on) this.onScreen(this.state.screen); }); }
@@ -1862,6 +1886,7 @@ class Component extends DCLogic {
     if (s==='setup') this.later(()=>this.goTap(),1400);
     else if (s==='tap') this.later(()=>this.doTap(),1300);
     else if (s==='consent') this.later(()=>this.consentSign(),1700);
+    else if (s==='claimpick') this.later(()=>this.goResult(),2200);
     else if (s==='result') this.later(()=>this.reset(),6500);
   }
 
@@ -2298,15 +2323,92 @@ class Component extends DCLogic {
 
   clientResult(p){ return { status:p.status, tag:p.decTag, title:p.decTitle, sub:p.decSub, chips:p.decChips, caption:p.decCaption }; }
 
+  // ===== claims: pick invoices to claim, then the claim form is built from the selection =====
+  fmtCNY(n){ return 'CNY '+Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+  CLAIM_INVOICES(){ return [
+    { id:'hosp', date:'2026-05-22', provider:'Shenzhen People’s Hospital', type:'Hospitalisation', dx:'Acute appendicitis · K35.8', amount:48600, held:2300, src:'SZDE', def:true },
+    { id:'op',   date:'2026-06-10', provider:'Futian Community Health Centre',  type:'Outpatient',      dx:'Post-op wound review',     amount:680,   held:0,    src:'SZDE', def:true },
+    { id:'rx',   date:'2026-06-12', provider:'Pharmacy · Futian',               type:'Medication',      dx:'Prescribed antibiotics',   amount:430,   held:0,    src:'SZDE', def:true },
+    { id:'spec', date:'2026-06-15', provider:'Shenzhen Second People’s Hospital', type:'Specialist', dx:'Elective consultation',  amount:1200,  held:0,    src:'SZDE', def:false },
+  ]; }
+  defaultClaimSel(){ const o={}; this.CLAIM_INVOICES().forEach(i=>{ o[i.id]=!!i.def; }); return o; }
+  claimSelMap(){ return this.state.claimSel || this.defaultClaimSel(); }
+  selectedClaimInvoices(){ const sel=this.claimSelMap(); return this.CLAIM_INVOICES().filter(i=>sel[i.id]); }
+  toggleClaim(id){ const sel=Object.assign({}, this.claimSelMap()); sel[id]=!sel[id]; this.setState({ claimSel:sel }); }
+  claimTotals(){ const sel=this.selectedClaimInvoices(); const total=sel.reduce((s,i)=>s+i.amount,0); const held=sel.reduce((s,i)=>s+i.held,0); return { sel, total, held, approved:total-held, n:sel.length }; }
+
+  claimForms(){
+    const V=this.V.bind(this),P=this.P.bind(this),E=this.E.bind(this),A=this.A.bind(this),DEC=this.DEC.bind(this);
+    const flag=o=>Object.assign(o,{flagged:true}); const fmtC=n=>this.fmtCNY(n);
+    const { sel, total, held, approved, n } = this.claimTotals();
+    const hosp = sel.find(i=>i.id==='hosp');
+    const forms = [
+      { code:'FORM · CLM-1', title:'Claim form', status:'auto-filled', sections:[
+        { title:'Claimant & policy', grid:true, fields:[
+          P('Claimant','陳志遠','MPS'), V('Matches policyholder','Yes','MPS',['Name ↔ ID match','Matches the policyholder on record']),
+          V('Live face check','Passed','MPS',['Liveness confirmed','Face-matched to ID portrait']), E('Policy no.','WL-2025-004821'),
+          E('Invoices claimed', String(n)), E('Date of claim','2026-06-25'),
+        ]},
+      ]},
+      { code:'FORM · INV-2', title:'Invoices claimed', status:'verified', sections:[
+        { invoice:true,
+          meta:{ hospital:String(n)+' invoice'+(n===1?'':'s')+' selected by claimant', invoiceNo:'eID-retrieved', total:fmtC(total),
+            split:'Approved '+fmtC(approved)+(held?(' · '+fmtC(held)+' held for review'):' · all in-policy'),
+            corroborated:'Each invoice verified at source (SZDE) and cross-checked against cover', coverage:'Tick / untick on the previous step to change the claim' },
+          fields: sel.map(i=> (i.held>0
+            ? flag(V(i.type+' · '+i.provider, fmtC(i.amount), i.src, [i.date+' · '+i.dx, fmtC(i.amount-i.held)+' in-policy · '+fmtC(i.held)+' held — outside cover']))
+            : V(i.type+' · '+i.provider, fmtC(i.amount), i.src, [i.date+' · '+i.dx, 'Verified at source · in-policy'])) ) },
+      ]},
+    ];
+    if(hosp){ forms.push({ code:'FORM · BILL-3', title:'Itemised hospital bill · '+hosp.provider, status:'verified', sections:[
+      { invoice:true,
+        meta:{ hospital:hosp.provider, invoiceNo:'4403-2026-0001234', total:fmtC(hosp.amount),
+          split:'Pooled fund paid CNY 41,300 · personal account & cash CNY 7,300', corroborated:'Diagnosis corroborated by NHC + NHSA', coverage:'source covers ~70–80% of hospitals' },
+        fields:[
+          V('Ward & bed','CNY 4,800','SZDE',['4 nights · standard ward','Fund-paid · in-policy']),
+          V('Surgery fee','CNY 18,200','SZDE',['Laparoscopic appendectomy','Standard rate · in-policy']),
+          V('Anaesthesia','CNY 3,600','SZDE',['General anaesthesia','Fund-paid · in-policy']),
+          V('Medication','CNY 9,400','SZDE',['Itemised drug list returned','Within formulary · in-policy']),
+          V('Lab tests','CNY 3,100','SZDE',['Pre-op bloods & pathology','In-policy']),
+          V('Imaging','CNY 4,200','SZDE',['CT abdomen · ultrasound','In-policy']),
+          V('Nursing care','CNY 2,000','SZDE',['Post-op nursing','In-policy']),
+          V('Consumables','CNY 1,000','SZDE',['Surgical consumables','In-policy']),
+          flag(V('Private-room upgrade','CNY 2,300 · not covered','SZDE',['Self-pay comfort upgrade','Outside policy room cover','Held — not auto-paid'])),
+        ]}, ]});
+    }
+    forms.push({ code:'FORM · ASMT-4', title:'Claims assessment', status:'adjudicated', kind:'review', sections:[
+      { title:'Adjudication', fields:[
+        V('Invoices verified in-policy', n+' of '+n,'SZDE',['Each invoice cross-checked against cover']),
+        ...(held>0 ? [flag(V('Held for review', fmtC(held)+' · private-room upgrade','SZDE',['1 line outside cover','Caught before payment']))] : []),
+        V('Anti-fraud cross-reference','No prior matching claims','CBII',['Checked against prior claims','Duplicate-bill check','Result: no match']),
+      ]},
+      { title:'Settlement', grid:true, fields:[
+        E('Amount billed', fmtC(total)), A('Approved amount', fmtC(approved)), A('Held for review', fmtC(held)), A('Invoices', String(n)),
+      ]},
+      { fields:[ DEC({ verdict:(held>0?'Approved — 1 item held':'Approved'), verdictColor:'var(--good)', sub:fmtC(approved)+' cleared for payment'+(held?(' · '+fmtC(held)+' held for review'):''), stampText:'APPROVED', reviewer:'Claims adjudication · automated', stp:(held>0?'leakage caught before payment':'all lines in-policy') }) ]},
+    ]});
+    return forms;
+  }
+  claimResult(){
+    const { total, held, approved, n } = this.claimTotals(); const fmtC=n2=>this.fmtCNY(n2);
+    return { status:'approved', tag:'Adjudicated',
+      title:(held>0?'Claim approved — 1 item held.':'Claim approved.'),
+      sub:n+' invoice'+(n===1?'':'s')+' · '+fmtC(total)+' billed · '+fmtC(approved)+' approved'+(held?(' · '+fmtC(held)+' held'):'')+'.',
+      chips:[ {label:'Per claim',before:'≈4 days',after:'~4 min'}, {label:'Invoices',before:'Chased',after:String(n)+' auto'}, {label:'Bill check',before:'Manual',after:'Line-by-line'} ],
+      caption:'No bills chased. You picked the invoices; the claim form, the itemised bill and the assessment filled themselves — verified at source.' };
+  }
+
   renderVals() {
     const S = this.state;
     const j = this.jrn();
     const screen = S.screen;
     const isHome=screen==='home', isSetup=screen==='setup', isTap=screen==='tap', isReading=screen==='reading',
           isConsent=screen==='consent', isPull=screen==='pull', isResult=screen==='result',
-          isAssess=screen==='assess', isOnboard=screen==='onboard', isDone=screen==='done';
+          isAssess=screen==='assess', isOnboard=screen==='onboard', isDone=screen==='done',
+          isClaimPick=screen==='claimpick';
     const isAgentFlow = (S.journey==='agent');
     const isClientFlow = (S.journey==='client');
+    const isClaimsFlow = (S.journey==='claims');
     // white-label brand view-model (rail = platform/GovVerify, phone = insurer)
     const brand = { railName: BRAND.platform.name+' · '+BRAND.platform.nameZh, railEyebrow: BRAND.platform.product, insurerName: (this.zhOn()?BRAND.insurer.nameZh:BRAND.insurer.name), platformBadge: BRAND.platform.product+' HK' };
     const showSections = isPull || isResult;
@@ -2314,7 +2416,7 @@ class Component extends DCLogic {
     const revealedEff = (isResult||isAssess||isOnboard||isDone) ? total : S.revealed;
     const noop = () => {};
 
-    const beatMap = { home:0, setup:1, tap:2, reading:2, consent:3, pull:4, result:5, assess:5, onboard:5, done:5 };
+    const beatMap = { home:0, setup:1, tap:2, reading:2, consent:3, pull:4, result:5, assess:5, onboard:5, done:5, claimpick:4 };
     const cur = beatMap[screen];
     const beats = ['Set up','Tap','Consent','Pull','Result'].map((label,i)=>{ const n=i+1, active=cur===n, done=cur>n;
       const color = active ? '#FFFDF5' : (done ? 'rgba(255,253,245,.55)' : 'rgba(255,253,245,.32)');
@@ -2325,7 +2427,7 @@ class Component extends DCLogic {
 
     // build forms view
     let gi = 0; const litSet = {}; const railOrder = []; const viewForms = [];
-    const formsData = j ? (isClientFlow ? this.clientForms(this.clientProfile()) : j.forms) : [];
+    const formsData = j ? (isClientFlow ? this.clientForms(this.clientProfile()) : (isClaimsFlow ? this.claimForms() : j.forms)) : [];
     if (j) {
       formsData.forEach(form => {
         const viewSecs = []; let formVisible = false;
@@ -2424,8 +2526,8 @@ class Component extends DCLogic {
         radioStyle:{ width:'18px', height:'18px', borderRadius:'999px', flex:'none', border: sel?'5px solid var(--blue)':'2px solid var(--line)', background:'#fff', transition:'border .15s' } }; }) }; }
 
     let decision = null;
-    if (j) { const dd = isClientFlow ? this.clientResult(this.clientProfile()) : j.decision;
-      const dCol = (isClientFlow && dd.status && dd.status!=='approved') ? 'var(--orange)' : 'var(--good)';
+    if (j) { const dd = isClientFlow ? this.clientResult(this.clientProfile()) : (isClaimsFlow ? this.claimResult() : j.decision);
+      const dCol = ((isClientFlow||isClaimsFlow) && dd.status && dd.status!=='approved') ? 'var(--orange)' : 'var(--good)';
       decision = { tag:dd.tag, title:dd.title, sub:dd.sub, chips:dd.chips,
         bannerStyle:{ border:'1px solid '+dCol, borderRadius:'14px', padding:'18px', background:'#fff', marginBottom:'18px', animation: this.reduced?'none':'feFieldIn .35s cubic-bezier(.2,.7,.2,1) both' } }; }
 
@@ -2434,7 +2536,12 @@ class Component extends DCLogic {
     if (isSetup) footer = { show:true, label:'Continue to verify', onClick:()=>this.goTap(), style:this.btnSignal() };
     else if (isPull && S.loadingDone) footer = isAgentFlow
       ? { show:true, label:(this.zhOn()?'查看資格評估':'View eligibility'), onClick:()=>this.goAssess(), style:this.btnSignal() }
-      : { show:true, label:'View assessment', onClick:()=>this.goResult(), style:this.btnSignal() };
+      : (isClaimsFlow
+        ? { show:true, label:'Review invoices →', onClick:()=>this.goClaimPick(), style:this.btnSignal() }
+        : { show:true, label:'View assessment', onClick:()=>this.goResult(), style:this.btnSignal() });
+    else if (isClaimPick) { const anySel=this.selectedClaimInvoices().length>0;
+      footer = anySel ? { show:true, label:'Continue to claim →', onClick:()=>this.goResult(), style:this.btnSignal() }
+                      : { show:true, label:'Select at least one invoice', onClick:()=>{}, style:btnMuted }; }
     else if (isResult) footer = { show:true, label:'Run another journey', onClick:()=>this.reset(), style:this.btnInk() };
     else if (isAssess) { const st=this.agentElig().status;
       footer = (st==='ineligible')
@@ -2577,8 +2684,17 @@ class Component extends DCLogic {
       langBtnStyle:{ fontFamily:"var(--fm)", fontSize:'11px', fontWeight:600, letterSpacing:'.04em', color:'var(--ink)', background:'var(--paper-2)', border:'1px solid var(--line-ink)', borderRadius:'999px', padding:'5px 11px', cursor:'pointer', flex:'none' },
     };
 
+    const claimSelM = this.claimSelMap();
+    const claimInvoices = isClaimsFlow ? this.CLAIM_INVOICES().map(i=>{ const on=!!claimSelM[i.id]; return {
+        id:i.id, line:i.type+' · '+i.provider, meta:i.date+' · '+i.dx, amount:this.fmtCNY(i.amount), on,
+        onToggle:()=>this.toggleClaim(i.id),
+        style:{ display:'flex', alignItems:'center', gap:'12px', width:'100%', textAlign:'left', cursor:'pointer', background:'#fff', border: on?'1px solid var(--ink)':'1px solid var(--line-ink)', borderRadius:'12px', padding:'13px 14px', marginBottom:'10px', transition:'border-color .15s' },
+        boxStyle:{ width:'20px', height:'20px', borderRadius:'6px', flex:'none', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--fm)', fontSize:'12px', color:'#fff', background: on?'var(--good)':'#fff', border:'2px solid '+(on?'var(--good)':'var(--line)') },
+        check: on?'✓':'' }; }) : [];
+    const claimT = this.claimTotals();
     return {
-      isHome, isSetup, isTap, isReading, isConsent, isPull, isResult, isAssess, isOnboard, isDone, isAgentFlow, agent, showSections, isLoading, showForms, showFormsOrOnboard: (showForms||isOnboard),
+      isHome, isSetup, isTap, isReading, isConsent, isPull, isResult, isAssess, isOnboard, isDone, isClaimPick, isAgentFlow, agent, showSections, isLoading, showForms, showFormsOrOnboard: (showForms||isOnboard),
+      claimInvoices, claimTotal:this.fmtCNY(claimT.total), claimCount:claimT.n,
       showHint: revealedEff > 0,
       headerTag: j ? j.tag : BRAND.insurer.short,
       backBtnStyle:{ width:'26px', height:'26px', flex:'none', borderRadius:'8px', border:'1px solid var(--line-ink)', background:'#fff', color:'var(--ink)', cursor:'pointer', fontSize:'14px', lineHeight:1, display: isHome?'none':'flex', alignItems:'center', justifyContent:'center' },
@@ -2594,7 +2710,7 @@ class Component extends DCLogic {
       setup,
       tapPersonaTag: j ? j.personaTag : '',
       doTap:()=>this.doTap(), consentSign:()=>this.consentSign(),
-      sourceRail, viewForms, brand, caption: isClientFlow?this.clientResult(this.clientProfile()).caption:(j?j.caption:''), decision, footer,
+      sourceRail, viewForms, brand, caption: isClientFlow?this.clientResult(this.clientProfile()).caption:(isClaimsFlow?this.claimResult().caption:(j?j.caption:'')), decision, footer,
       loaderChips, loaderRingStyle, loadPct: S.loadPct + '%', loadMsg: S.loadMsg, loadCount: litCount + ' / ' + railOrder.length + ' sources',
       tip, closeTip:()=>this.closeTip(), stop:(e)=>{ if(e&&e.stopPropagation)e.stopPropagation(); },
       field, closeField:()=>this.closeField(),
