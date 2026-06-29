@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Complete Recruitment File · 整份入職文件 — Meridian Life (sample)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --yellow:#FED200; --ink:#231815; --ink2:#3A2F2B; --soft:#7A6F6B; --paper:#FFFDF5; --paper2:#FFF7D1;
+    --line:rgba(35,24,21,.14); --good:#1A7A3A; --blue:#1A52C1; --orange:#F96328;
+    --fd:'Manrope',system-ui,sans-serif; --fb:'Inter',system-ui,sans-serif; --fm:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#2a2622;font-family:var(--fb);color:var(--ink);padding:28px 16px;line-height:1.5;}
+  .doc{max-width:840px;margin:0 auto;background:#fff;border-radius:6px;box-shadow:0 30px 70px -30px rgba(0,0,0,.6);overflow:hidden;}
+  .band{background:var(--ink);color:var(--paper);padding:22px 30px;display:flex;align-items:center;gap:16px;}
+  .sun{width:46px;height:46px;border-radius:999px;background:radial-gradient(circle at 50% 45%,#FFE45C 0 48%,var(--yellow) 49% 100%);box-shadow:0 0 0 3px rgba(254,210,0,.3);flex:none;}
+  .band .wm{font-family:var(--fd);font-weight:800;font-size:20px;letter-spacing:-.01em;}
+  .band .sub{font-family:var(--fm);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--yellow);margin-top:3px;}
+  .band .title{margin-left:auto;text-align:right;}
+  .band .title b{font-family:var(--fd);font-weight:700;font-size:15px;display:block;}
+  .band .title span{font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,253,245,.6);}
+  .demo{background:var(--orange);color:#fff;font-family:var(--fm);font-size:10px;letter-spacing:.16em;text-transform:uppercase;text-align:center;padding:5px;}
+  .status{display:flex;flex-wrap:wrap;gap:18px 26px;align-items:center;padding:18px 30px;border-bottom:1px solid var(--line);background:var(--paper);}
+  .approved{display:inline-flex;align-items:center;gap:9px;font-family:var(--fd);font-weight:800;font-size:18px;color:var(--good);}
+  .approved .dot{width:24px;height:24px;border-radius:999px;background:var(--good);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:13px;}
+  .kv{font-size:12px;}
+  .kv .k{font-family:var(--fm);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);}
+  .kv .v{font-family:var(--fm);font-weight:600;font-size:13px;color:var(--ink);}
+  .sec{padding:20px 30px;border-bottom:1px solid var(--line);}
+  .sec h2{font-family:var(--fd);font-weight:700;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .sec h2 .n{font-family:var(--fm);font-size:11px;color:#fff;background:var(--ink);border-radius:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex:none;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px 22px;}
+  .f .k{font-family:var(--fm);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);margin-bottom:2px;}
+  .f .v{font-family:var(--fd);font-weight:600;font-size:13px;color:var(--ink);}
+  .src{font-family:var(--fm);font-size:8px;letter-spacing:.04em;text-transform:uppercase;color:var(--soft);background:var(--paper2);border:1px solid var(--line);border-radius:999px;padding:1px 6px;margin-left:6px;white-space:nowrap;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{font-family:var(--fm);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
+  td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;font-family:var(--fb);}
+  td .nm{font-family:var(--fd);font-weight:600;color:var(--ink);}
+  .pill{font-family:var(--fm);font-size:8px;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:2px 8px;white-space:nowrap;display:inline-block;}
+  .auto{color:var(--good);background:rgba(26,122,58,.1);border:1px solid rgba(26,122,58,.4);}
+  .manual{color:var(--soft);background:var(--paper2);border:1px solid var(--line);}
+  .part{color:var(--blue);background:rgba(26,82,193,.08);border:1px solid rgba(26,82,193,.4);}
+  .pass{color:var(--good);font-family:var(--fm);font-weight:600;}
+  .lnk{font-family:var(--fm);font-size:11px;color:var(--blue);text-decoration:none;}
+  .appr{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .appr .box{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--paper);}
+  .appr .role{font-family:var(--fm);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);}
+  .appr .who{font-family:var(--fd);font-weight:700;font-size:13px;color:var(--ink);margin:3px 0;}
+  .appr .ok{font-family:var(--fm);font-size:11px;color:var(--good);}
+  .sig{display:flex;gap:30px;margin-top:16px;flex-wrap:wrap;}
+  .sig .s{flex:1;min-width:160px;}
+  .sig .ln{border-bottom:1px solid var(--ink);height:30px;}
+  .sig .lb{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);margin-top:5px;}
+  .foot{padding:16px 30px 24px;font-family:var(--fm);font-size:9.5px;letter-spacing:.06em;color:var(--soft);line-height:1.7;text-align:center;}
+  .toolbar{max-width:840px;margin:0 auto 14px;display:flex;justify-content:flex-end;gap:10px;}
+  .toolbar button{font-family:var(--fd);font-weight:700;font-size:13px;color:var(--ink);background:var(--yellow);border:1px solid var(--ink);border-radius:9px;padding:9px 16px;cursor:pointer;}
+  @media print{
+    body{background:#fff;padding:0;}
+    .doc{box-shadow:none;border-radius:0;max-width:none;}
+    .toolbar{display:none;}
+    .sec{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+  <div class="doc">
+    <div class="band">
+      <div class="sun"></div>
+      <div><div class="wm">Meridian Life · 子午人壽</div><div class="sub">Advisor onboarding</div></div>
+      <div class="title"><b>Complete Recruitment File</b><span>整份入職文件</span></div>
+    </div>
+    <div class="demo">Sample · demonstration only — not a real Meridian Life document</div>
+
+    <div class="status">
+      <span class="approved"><span class="dot">✓</span> APPROVED · 已批准</span>
+      <div class="kv"><div class="k">Application reference</div><div class="v">RA-2026-08831</div></div>
+      <div class="kv"><div class="k">Agent code</div><div class="v">HK-AG-204417</div></div>
+      <div class="kv"><div class="k">Submitted</div><div class="v">2026-06-22</div></div>
+      <div class="kv"><div class="k">Approved</div><div class="v">2026-06-29</div></div>
+      <div class="kv"><div class="k">Subsidy scheme · e-Recruitment</div><div class="v">Standard / Enhanced</div></div>
+    </div>
+
+    <!-- A · eApplication -->
+    <div class="sec">
+      <h2><span class="n">A</span> eApplication — applicant particulars</h2>
+      <div class="grid">
+        <div class="f"><div class="k">Full name</div><div class="v">郭偉明 · Kwok Wai Ming <span class="src">MPS</span></div></div>
+        <div class="f"><div class="k">ID document (居民身份證)</div><div class="v">4403 **** **** 0017 <span class="src">MPS</span></div></div>
+        <div class="f"><div class="k">Sex · Date of birth</div><div class="v">Male · 1998-04-11 <span class="src">MPS</span></div></div>
+        <div class="f"><div class="k">Mobile · Email</div><div class="v">+86 139 ****2233 · kwok****@qq.com <span class="src">Telecom</span></div></div>
+        <div class="f"><div class="k">Residential address</div><div class="v">Shenzhen, Guangdong · now in HK <span class="src">AMap</span></div></div>
+        <div class="f"><div class="k">Passport-size photo</div><div class="v">On file <span class="src">MPS portrait</span></div></div>
+      </div>
+    </div>
+
+    <!-- Right to work -->
+    <div class="sec">
+      <h2><span class="n">B</span> Right to work in Hong Kong</h2>
+      <div class="grid">
+        <div class="f"><div class="k">Identity</div><div class="v">Verified <span class="src">MPS</span></div></div>
+        <div class="f"><div class="k">Travel permit (港澳通行證)</div><div class="v">Valid <span class="src">NIA</span></div></div>
+        <div class="f"><div class="k">HK visa — right to work</div><div class="v">IANG · non-local graduate <span class="pill part">Applicant-declared</span></div></div>
+        <div class="f"><div class="k">Visa note</div><div class="v">Applied within 6 months of graduation; contract signed within the 24-month visa.</div></div>
+      </div>
+    </div>
+
+    <!-- Education + experience -->
+    <div class="sec">
+      <h2><span class="n">C</span> Education, licensing &amp; income</h2>
+      <div class="grid">
+        <div class="f"><div class="k">Degree (CHESICC-verified)</div><div class="v">BBA · Shenzhen University · 2023 <span class="src">CHESICC</span></div></div>
+        <div class="f"><div class="k">IIQE Paper I &amp; III</div><div class="v">Passed · within validity</div></div>
+        <div class="f"><div class="k">Prior insurance experience</div><div class="v">None · fresh graduate <span class="src">CBII</span></div></div>
+        <div class="f"><div class="k">Annual income</div><div class="v">HK$240,000 <span class="src">MOHRSS</span></div></div>
+        <div class="f"><div class="k">Joining as</div><div class="v">Financial Planner (FP) · full-time</div></div>
+        <div class="f"><div class="k">Commission payout account</div><div class="v">HSBC HK 004-888888-001</div></div>
+      </div>
+    </div>
+
+    <!-- D · documents -->
+    <div class="sec">
+      <h2><span class="n">D</span> Documents · Full Recruitment File</h2>
+      <table>
+        <thead><tr><th style="width:46%">Document</th><th>Source / mode</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="nm">eApplication Form</td><td><span class="pill auto">Replaced · System</span></td><td class="pass">Generated</td></tr>
+          <tr><td class="nm">Mainland ID (居民身份證)</td><td><span class="pill auto">Replaced · MPS</span></td><td class="pass">Certified</td></tr>
+          <tr><td class="nm">HK visa copy (簽証文件)</td><td><span class="pill manual">Manual upload</span></td><td class="pass">Certified</td></tr>
+          <tr><td class="nm">Conditions of Stay / Landing slip (小白條)</td><td><span class="pill manual">Manual upload</span></td><td class="pass">Certified</td></tr>
+          <tr><td class="nm">Travel permit (港澳通行證)</td><td><span class="pill auto">Replaced · NIA</span></td><td class="pass">Certified</td></tr>
+          <tr><td class="nm">Residential address proof</td><td><span class="pill auto">Replaced · AMap</span></td><td class="pass">Certified</td></tr>
+          <tr><td class="nm">Bank statement / passbook</td><td><span class="pill manual">Manual upload</span></td><td class="pass">Certified</td></tr>
+          <tr><td class="nm">Education proof + CHESICC authentication</td><td><span class="pill auto">Replaced · CHESICC</span></td><td class="pass">Certified</td></tr>
+          <tr><td class="nm">IIQE result slips (Paper I / III)</td><td><span class="pill manual">Manual upload</span></td><td class="pass">Certified</td></tr>
+          <tr><td class="nm">Passport-size photo</td><td><span class="pill auto">Replaced · MPS portrait</span></td><td class="pass">On file</td></tr>
+          <tr><td class="nm">Income proof</td><td><span class="pill auto">Replaced · MOHRSS</span></td><td class="pass">Certified</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- E · Licensing due-diligence -->
+    <div class="sec">
+      <h2><span class="n">E</span> Licensing due-diligence checks</h2>
+      <table>
+        <thead><tr><th style="width:34%">Check</th><th>Mode</th><th>Source · link</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td class="nm">Identity</td><td><span class="pill auto">Automated</span></td><td><a class="lnk" href="https://www.mps.gov.cn" target="_blank" rel="noopener">MPS · mps.gov.cn</a></td><td class="pass">PASS</td></tr>
+          <tr><td class="nm">Right to work</td><td><span class="pill part">Part-auto</span></td><td><a class="lnk" href="https://www.nia.gov.cn" target="_blank" rel="noopener">NIA · nia.gov.cn</a> + HK visa (declared)</td><td class="pass">PASS</td></tr>
+          <tr><td class="nm">Academic qualification</td><td><span class="pill auto">Automated</span></td><td><a class="lnk" href="https://www.chsi.com.cn" target="_blank" rel="noopener">CHESICC · chsi.com.cn</a></td><td class="pass">PASS</td></tr>
+          <tr><td class="nm">Credit &amp; litigation</td><td><span class="pill auto">Automated</span></td><td><a class="lnk" href="https://www.pbccrc.org.cn" target="_blank" rel="noopener">PBOC credit · pbccrc.org.cn</a></td><td class="pass">PASS</td></tr>
+          <tr><td class="nm">Agent-debt (ex-insurer)</td><td><span class="pill manual">Manual</span></td><td>Licensing authorisation to ex-insurer</td><td class="pass">PASS</td></tr>
+          <tr><td class="nm">Factiva / PEP</td><td><span class="pill auto">Automated</span></td><td><a class="lnk" href="https://www.dowjones.com/factiva" target="_blank" rel="noopener">Dow Jones Factiva</a></td><td class="pass">PASS</td></tr>
+          <tr><td class="nm">Blacklist (IA &amp; HKFI)</td><td><span class="pill auto">Automated</span></td><td><a class="lnk" href="https://www.ia.org.hk" target="_blank" rel="noopener">ia.org.hk · hkfi.org.hk</a></td><td class="pass">PASS</td></tr>
+          <tr><td class="nm">IA registration history</td><td><span class="pill auto">Automated</span></td><td><a class="lnk" href="https://iir.ia.org.hk" target="_blank" rel="noopener">IIC 保險中介一站通 · iir.ia.org.hk</a></td><td class="pass">PASS</td></tr>
+          <tr><td class="nm">IIQE Paper I &amp; III</td><td><span class="pill manual">Manual</span></td><td>Candidate sat the exam</td><td class="pass">PASS</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- F · decision & approval -->
+    <div class="sec">
+      <h2><span class="n">F</span> Decision &amp; approval routing</h2>
+      <div class="appr">
+        <div class="box"><div class="role">District Director (DD)</div><div class="who">Certified true copies</div><div class="ok">✓ 2026-06-24</div></div>
+        <div class="box"><div class="role">Area Director (AD)</div><div class="who">Approved application</div><div class="ok">✓ 2026-06-26</div></div>
+        <div class="box"><div class="role">Licensing</div><div class="who">Due-diligence &amp; processing</div><div class="ok">✓ 2026-06-29</div></div>
+      </div>
+      <div class="grid" style="margin-top:14px;">
+        <div class="f"><div class="k">Compulsory training</div><div class="v">PW-TL + CW completed · 2026-06-27</div></div>
+        <div class="f"><div class="k">Contract signing</div><div class="v">e-Contract · agent code released T+1</div></div>
+        <div class="f"><div class="k">IA registration</div><div class="v">Form A1 filed via IIC (保險中介一站通)</div></div>
+        <div class="f"><div class="k">Protection period</div><div class="v">6 months from submission</div></div>
+      </div>
+      <div class="sig">
+        <div class="s"><div class="ln"></div><div class="lb">Recruiting manager</div></div>
+        <div class="s"><div class="ln"></div><div class="lb">District Director (DD)</div></div>
+        <div class="s"><div class="ln"></div><div class="lb">Area Director (AD)</div></div>
+      </div>
+    </div>
+
+    <div class="foot">
+      Meridian Life Hong Kong · Licensing &amp; Registration · e-Recruitment — assembled file<br>
+      SAMPLE / 示範文件 — fabricated demo data, indicative only, not an official Meridian Life document or offer.
+    </div>
+  </div>
+</body>
+</html>
